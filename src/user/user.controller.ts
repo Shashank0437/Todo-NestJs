@@ -7,7 +7,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../auth/decorator/get-user.decorator';
@@ -19,17 +18,18 @@ import { diskStorage } from 'multer';
 import { UserInfoDto } from './dto/user-info.dto';
 import { UserService } from './service/user-info.service';
 import * as path from 'path';
+import { JwtTwoFactorGuard } from '../guards/jwt-two-factor.gaurd';
 
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(AuthGuard())
+@UseGuards(JwtTwoFactorGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
   getUserInfo(@GetUser() user: User): Promise<userInfoData> {
-    console.log(user);
+    //console.log(user);
     return this.userService.getUser(user);
   }
 

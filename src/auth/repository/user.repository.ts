@@ -26,6 +26,7 @@ export const UserRepository = AppDataSource.getRepository(User).extend({
 
       user.user_info = userInfo;
       await user.save();
+      return { message: 'User successfully created !' };
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException('Username already exists');
@@ -41,11 +42,21 @@ export const UserRepository = AppDataSource.getRepository(User).extend({
     const { username, password } = signinCredentialDto;
     const auth = await this.findOneBy({ username: username });
 
-    if (auth && (await auth.validatePassword(password))) {
+    if (auth && (await auth.validatePassword(password, auth.password))) {
       return {
+        isTwoFactorEnable: auth.isTwoFactorEnable,
         username: auth.username,
         user_info: auth.user_info,
       };
+    } else {
+      return null;
+    }
+  },
+
+  async getUserInfoByUsername(username: string) {
+    const auth = await this.findOneBy({ username: username });
+    if (auth) {
+      return auth;
     } else {
       return null;
     }
